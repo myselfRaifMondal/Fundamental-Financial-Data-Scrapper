@@ -28,13 +28,14 @@ Tired of manually downloading financial data from websites? This scrapper automa
 ```
 Fundamental-Financial-Data-Scrapper/
 │
-├── main.py                # Main script to run the scraping process
-├── scrapper.py            # Contains core web scraping logic
-├── stocks.py              # Helper functions for stock symbol handling
-├── balance_sheet.csv      # Output: balance sheet data
-├── Equity.csv             # Output: equity data
-├── cList.txt              # Input: list of company symbols
-├── dList.txt              # Input: list of dates or data-related config
+├── scrapper.py            # Run this: scrapes balance sheets from screener.in
+├── main.py                # Local analysis script over balance_sheet.csv
+├── stocks.py              # Reads the ticker universe out of Equity.csv
+├── balance_sheet.csv      # Balance sheet data
+├── Equity.csv             # Input: ticker universe ("Security Id" column)
+├── cList.txt              # Output: tickers that failed to scrape
+├── dList.txt              # Output: tickers scraped successfully
+├── requirements.txt       # Python dependencies
 ├── LICENSE                # Open-source license (Apache 2.0)
 ├── README.md              # You’re reading it!
 └── __pycache__/           # Python bytecode cache
@@ -42,7 +43,7 @@ Fundamental-Financial-Data-Scrapper/
 
 ---
 
-## 🛠️ Getting Started
+## 🛠️ Setup / Usage
 
 ### 1. Clone the Repository
 
@@ -51,47 +52,57 @@ git clone https://github.com/myselfRaifMondal/Fundamental-Financial-Data-Scrappe
 cd Fundamental-Financial-Data-Scrapper
 ```
 
-### 2. Set Up Inputs
+### 2. Install Dependencies
 
-- `cList.txt`: Add the stock tickers/symbols (one per line) of companies you want to scrape.
-- `dList.txt`: Used optionally if scraping for specific dates/sectors (depends on implementation).
+Python 3.9 or above is recommended. Using a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+`requirements.txt` pins the third-party packages actually imported by the code:
+`pandas`, `numpy`, `requests`, `urllib3`, `beautifulsoup4` and `yfinance`.
 
 ### 3. Run the Scraper
+
+The scraping job lives in `scrapper.py`, and running that file is what performs the scrape:
+
+```bash
+python scrapper.py
+```
+
+It reads the ticker universe from `Equity.csv` (via `getStocks()` in `stocks.py`, which
+returns the `Security Id` column), fetches each company's balance sheet from
+screener.in — trying the consolidated statement first and falling back to standalone —
+and sleeps 15–20 seconds between requests, so a full run takes a long time.
+
+Output of a run:
+
+- `stocks.csv` — scraped balance-sheet rows, **appended** one ticker at a time
+- `dList.txt` — tickers that were scraped and written successfully
+- `cList.txt` — tickers that failed (no balance sheet found, or a write error)
+
+### 4. Inspect the Data
+
+`main.py` is a small local analysis script, **not** the scraper. It loads
+`balance_sheet.csv` with an explicit column list and parses the index into
+timestamps:
 
 ```bash
 python main.py
 ```
 
-### 4. Output
-
-Scraped data will be saved in:
-- `balance_sheet.csv`
-- `Equity.csv`
-
----
-
-## 📦 Dependencies
-
-This project requires Python 3.7 or above.
-
-Install dependencies using:
-
-```bash
-pip install -r requirements.txt
-```
-
-> Note: If `requirements.txt` is missing, you can manually install likely packages:
-```bash
-pip install requests pandas
-```
+Run it once you have a CSV of scraped data to look at.
 
 ---
 
 ## 🧰 Example Use Case
 
-1. Add companies like `TCS`, `INFY`, `RELIANCE` in `cList.txt`.
-2. Run `main.py`.
-3. Open `balance_sheet.csv` and `Equity.csv` for clean, tabular financial data.
+1. Put the tickers you care about in the `Security Id` column of `Equity.csv`.
+2. Run `python scrapper.py`.
+3. Open `stocks.csv` for clean, tabular financial data.
 
 Perfect for:
 - Investment Research 📈

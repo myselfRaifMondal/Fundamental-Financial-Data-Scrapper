@@ -1,0 +1,14 @@
+# Third-party packages imported by main.py, scrapper.py and stocks.py.
+# Install with: pip install -r requirements.txt
+
+# Data handling — used by main.py, scrapper.py and stocks.py
+pandas>=2.0,<3.0
+numpy>=1.24,<3.0
+
+# HTTP + HTML parsing — used by scrapper.py
+requests>=2.31,<3.0
+urllib3>=2.0,<3.0
+beautifulsoup4>=4.12,<5.0
+
+# Market data — imported by scrapper.py
+yfinance>=0.2.40,<1.0
